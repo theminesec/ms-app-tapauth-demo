@@ -15,7 +15,6 @@ struct HomeView: View {
             Color.black.edgesIgnoringSafeArea(.all) 
             
             VStack(alignment: .leading, spacing: 20) {
-                // Welcome Title
                 Text("Welcome!")
                     .font(.largeTitle)
                     .fontWeight(.bold)
@@ -25,14 +24,12 @@ struct HomeView: View {
                     .font(.title)
                     .foregroundColor(.white)
                 
-                // Card UI
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.purple)
                         .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        // Card Header
                         HStack {
                             Text("BOC")
                                 .font(.title)
@@ -45,7 +42,6 @@ struct HomeView: View {
                                 .foregroundColor(.white)
                         }
                         
-                        // Card Description
                         Text("Credit Card | check description")
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.8))
@@ -56,7 +52,6 @@ struct HomeView: View {
                         
                         Spacer()
                         
-                        // Card Number
                         HStack {
                             Spacer()
                             Text("•••• •••• •••• 5592")
@@ -73,5 +68,6 @@ struct HomeView: View {
             }
             .padding()
         }
+        .navigationBarHidden(true)
     }
 }

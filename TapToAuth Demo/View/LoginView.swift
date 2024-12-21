@@ -59,7 +59,7 @@ struct LoginView: View {
                 .padding(.top, 100)
             }
             .navigationDestination(isPresented: $isLoggedIn) {
-                HomeView(userName: name)
+                TapCardView(userName: name)
             }
         }
     }

@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "samsung_pay.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

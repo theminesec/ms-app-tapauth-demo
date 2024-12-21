@@ -57,7 +57,7 @@ struct TapToAuth_DemoApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginView()
         }
     }
 }
