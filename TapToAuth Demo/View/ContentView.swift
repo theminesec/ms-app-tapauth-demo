@@ -9,34 +9,42 @@ import SwiftUI
 import CoreNFC
 
 struct NFCReaderView: View {
-    @StateObject private var viewModel = NFCReaderViewModel()
+    @State private var message: String = ""
+    private let nfcReader = NFCMiFareUltralight()
 
     var body: some View {
-        VStack {
-            Text(viewModel.nfcMessage)
-                .padding()
-                .multilineTextAlignment(.center)
+        VStack(spacing: 20) {
+            Text("NFC Reader")
+                .font(.title)
 
-            Button(action: {
-                viewModel.startScanning()
-            }) {
-                Text("Start NFC Scan")
-                    .padding()
+            Text(message)
+                .foregroundColor(.gray)
+
+            Button(action: startNFC) {
+                Text("Start NFC Session")
                     .foregroundColor(.white)
+                    .padding()
                     .background(Color.blue)
-                    .cornerRadius(8)
+                    .cornerRadius(10)
             }
         }
         .padding()
+        .onAppear {
+            setupCallbacks()
+        }
     }
-}
 
-struct ContentView: View {
-    var body: some View {
-        NFCReaderView()
+    private func startNFC() {
+        nfcReader.startSession()
     }
-}
 
-#Preview {
-    ContentView()
+    private func setupCallbacks() {
+        nfcReader.onReadSuccess = { card in
+            message = "Card UID: \(card.uid)\nCard Data: \(card.cardNo)"
+        }
+
+        nfcReader.onReadFailure = { error in
+            message = "Error: \(error)"
+        }
+    }
 }

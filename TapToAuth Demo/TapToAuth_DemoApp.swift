@@ -57,7 +57,8 @@ struct TapToAuth_DemoApp: App {
     
     var body: some Scene {
         WindowGroup {
-            LoginView()
+            //LoginView()
+            NFCReaderView()
         }
     }
 }

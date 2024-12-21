@@ -33,8 +33,8 @@ struct TapCardView: View {
 
             VStack {
                 let videoName = colorScheme == .dark ? "anim_await_card_night" : "anim_await_card_day"
-
-                if let videoURL = Bundle.main.url(forResource: videoName, withExtension: "mp4") {
+                //Remove usage of dark video
+                if let videoURL = Bundle.main.url(forResource: "anim_await_card_day", withExtension: "mp4") {
                     VideoPlayer(player: player)
                         .onAppear {
                             player = AVPlayer(url: videoURL)
