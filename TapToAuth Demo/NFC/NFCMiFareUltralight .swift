@@ -23,12 +23,10 @@ class NFCMiFareUltralight: NSObject, NFCTagReaderSessionDelegate {
         session?.begin()
     }
 
-    // Called when the session becomes active
     func tagReaderSessionDidBecomeActive(_ session: NFCTagReaderSession) {
         print("NFC session is now active.")
     }
 
-    // Required Delegate Methods
     func tagReaderSession(_ session: NFCTagReaderSession, didInvalidateWithError error: Error) {
         onReadFailure?("Session invalidated: \(error.localizedDescription)")
     }
@@ -81,7 +79,6 @@ class NFCMiFareUltralight: NSObject, NFCTagReaderSessionDelegate {
     }
 }
 
-// Data Model
 struct MifareUltraCard {
     let uid: String
     let cardNo: String
