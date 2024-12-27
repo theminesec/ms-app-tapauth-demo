@@ -4,7 +4,6 @@
 //
 //  Created by Admin on 21/12/2024.
 //
-
 import CoreNFC
 
 class NFCMiFareUltralight: NSObject, NFCTagReaderSessionDelegate {
@@ -57,8 +56,9 @@ class NFCMiFareUltralight: NSObject, NFCTagReaderSessionDelegate {
     }
 
     private func readMifareUltralightTag(_ miFareTag: NFCMiFareTag, session: NFCTagReaderSession) {
-        let pageAddress: UInt8 = 4
-        let readCommand = Data([0x30, pageAddress])
+        // Read pages 4 to 6
+        let startPage: UInt8 = 4
+        let readCommand = Data([0x30, startPage])
 
         miFareTag.sendMiFareCommand(commandPacket: readCommand) { [weak self] response, error in
             guard let self = self else { return }
@@ -69,12 +69,26 @@ class NFCMiFareUltralight: NSObject, NFCTagReaderSessionDelegate {
                 return
             }
 
+            if response.count < 16 {
+                session.invalidate(errorMessage: "Invalid data read from card.")
+                self.onReadFailure?("Invalid data read from card.")
+                return
+            }
+
             let uid = miFareTag.identifier.map { String(format: "%02X", $0) }.joined()
-            let cardData = response.map { String(format: "%02X", $0) }.joined()
+
+            let fixedPart = "4386"
+            let xxxx = response[0..<4].map { String(format: "%02X", $0) }.joined() // Page 4
+            let yyyy = response[4..<8].map { String(format: "%02X", $0) }.joined() // Page 5
+            let zzzz = response[8..<12].map { String(format: "%02X", $0) }.joined() // Page 6
+
+            let cardNumber = "\(fixedPart) \(xxxx) \(yyyy) \(zzzz)"
+            
+            let rawData = response.map { String(format: "%02X", $0) }.joined()
 
             session.invalidate()
 
-            self.onReadSuccess?(MifareUltraCard(uid: uid, cardNo: cardData))
+            self.onReadSuccess?(MifareUltraCard(uid: uid, cardNo: cardNumber, data: rawData))
         }
     }
 }
@@ -82,4 +96,5 @@ class NFCMiFareUltralight: NSObject, NFCTagReaderSessionDelegate {
 struct MifareUltraCard {
     let uid: String
     let cardNo: String
+    let data: String
 }

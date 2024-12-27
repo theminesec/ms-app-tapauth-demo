@@ -9,7 +9,8 @@ import SwiftUI
 
 struct LoginView: View {
     @State private var name: String = ""
-    @State private var isLoggedIn: Bool = false
+    @StateObject private var viewModel = LoginViewModel()
+    @State private var isLoading: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -36,12 +37,11 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .font(.system(size: 16))
                         .padding(.horizontal, 32)
-                    
-                    // Login Button
+
                     Button(action: {
-                        if !name.isEmpty {
-                            isLoggedIn = true
-                        }
+                        hideKeyboard()
+                        isLoading = true
+                        viewModel.startLoginProcess(userName: name)
                     }) {
                         Text("Tap Card to Login")
                             .font(.system(size: 18, weight: .bold))
@@ -52,15 +52,25 @@ struct LoginView: View {
                             .cornerRadius(8)
                             .padding(.horizontal, 32)
                     }
-                    .disabled(name.isEmpty)
+                    .disabled(name.isEmpty || isLoading)
                     
+                    if isLoading {
+                        ProgressView()
+                            .padding(.top)
+                    }
+
                     Spacer()
                 }
                 .padding(.top, 100)
             }
-            .navigationDestination(isPresented: $isLoggedIn) {
-                TapCardView(userName: name)
+            .navigationDestination(isPresented: $viewModel.isLoggedIn) {
+                ContentView()
             }
         }
     }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
 }

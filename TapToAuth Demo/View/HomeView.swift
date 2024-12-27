@@ -6,13 +6,12 @@
 //
 
 import SwiftUI
-
 struct HomeView: View {
     let userName: String
 
     var body: some View {
         ZStack {
-            Color.black.edgesIgnoringSafeArea(.all) 
+            Color.black.edgesIgnoringSafeArea(.all)
             
             VStack(alignment: .leading, spacing: 20) {
                 Text("Welcome!")
@@ -65,9 +64,30 @@ struct HomeView: View {
                 .frame(height: 200)
                 
                 Spacer()
+                
+                // Logout Button
+                Button(action: {
+                    logout()
+                }) {
+                    Text("Logout")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.red)
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                }
             }
             .padding()
         }
         .navigationBarHidden(true)
     }
+    
+    
+    private func logout() {
+        UserDefaults.standard.removeObject(forKey: Constants.UserDefaultsKeys.user)
+        UIApplication.shared.resetRootView(to: LoginView())
+    }
+    
 }
