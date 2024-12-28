@@ -8,165 +8,188 @@
 import SwiftUI
 
 struct NotificationsView: View {
-    @State private var showDialog = false
-    @State private var selectedNotification = notifications[0]
-
+    @State private var selectedOrder: Order? = nil
+    @StateObject private var viewModel = NotificationsViewModel()
+    
     var body: some View {
         NavigationView {
-            VStack(alignment: .leading) {
-                Text("Messages")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding(.leading)
-                    .padding(.top)
+            ZStack {
+                VStack(alignment: .leading) {
+                    Text("Messages")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.leading)
+                        .padding(.top)
 
-                List(notifications) { notification in
-                    NotificationRow(notification: notification)
-                        .onTapGesture {
-                            if notification.status == .pending {
-                                selectedNotification = notification
-                                showDialog = true
-                            }
+                    if viewModel.orders.isEmpty && !viewModel.isLoading {
+                        VStack {
+                            Spacer()
+                            Text("No notifications found!")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                            Spacer()
                         }
+                        .frame(maxWidth: .infinity)
+                    } else {
+                        List(viewModel.orders) { order in
+                            OrderRow(order: order)
+                                .onTapGesture {
+                                    if order.status == .pending {
+                                        selectedOrder = order
+                                    }
+                                }
+                        }
+                        .listStyle(PlainListStyle())
+                    }
                 }
-                .listStyle(PlainListStyle())
-            }
-            .navigationBarHidden(true)
-            .sheet(isPresented: $showDialog) {
-                NotificationDetailsDialog(notification: selectedNotification)
+                .navigationBarHidden(true)
+                .onAppear {
+                    viewModel.fetchOrders(for: retrieveUser()?.cardNo ?? "")
+                }
+                .sheet(item: $selectedOrder) { order in
+                    OrderDetailsDialog(order: order)
+                }
+                
+                // Loading Indicator
+                if viewModel.isLoading {
+                    ZStack {
+                        ProgressView("Loading Orders...")
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .foregroundColor(.white)
+                            .padding()
+                    }
+                }
             }
         }
     }
 }
 
-struct NotificationRow: View {
-    let notification: Notification
-
+struct OrderRow: View {
+    let order: Order
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(notification.amount)
+                Text(order.amount)
                     .font(.headline)
                     .fontWeight(.bold)
                 Spacer()
                 HStack(spacing: 4) {
-                    Image(systemName: notification.status.statusIcon)
-                        .foregroundColor(notification.status == .pending ? .yellow : .gray)
-                    Text(notification.status.statusText)
+                    Image(systemName: order.status.statusIcon)
+                        .foregroundColor(order.status.color)
+                    Text(order.status.rawValue)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
             }
-
+            
             HStack {
-                Text("Card: \(notification.card)")
+                Text("Card: \(order.fullCardNo)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                 Spacer()
-                Text("Order: \(notification.order)")
+                Text("Order: \(order.orderId)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
-
-            if let expiresIn = notification.expiresIn {
-                Text("Expires in: \(expiresIn)")
-                    .font(.subheadline)
-                    .foregroundColor(.red)
-            } else {
-                Text("Created: \(notification.createdTime)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
+            
+            Text("Created: \(order.formattedCreatedDate())")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            Text("Expires in: \(order.formattedExpiredDate())")
+                .font(.subheadline)
+                .foregroundColor(.red)
         }
         .padding()
-        .background(notification.status.color)
+        .background(order.status.color)
         .cornerRadius(8)
         .shadow(radius: 2)
     }
 }
 
-struct NotificationDetailsDialog: View {
-    let notification: Notification
+struct OrderDetailsDialog: View {
+    let order: Order
     @Environment(\.presentationMode) var presentationMode
-
+    
     var body: some View {
         VStack(spacing: 20) {
-            Text("Message Details")
+            Text("Order Details")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top)
-
+            
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Order ID")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.black)
-                    Text(notification.order)
+                    Text(order.orderId)
                         .font(.body)
                         .foregroundColor(.black)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Description")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.black)
-                    Text("Pay \(notification.amount) to the TV")
+                    Text(order.description)
                         .font(.body)
                         .foregroundColor(.black)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Amount")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.black)
-                    Text(notification.amount)
+                    Text(order.amount)
                         .font(.body)
                         .foregroundColor(.black)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Card No")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.black)
-                    Text(notification.card)
+                    Text(order.fullCardNo)
                         .font(.body)
                         .foregroundColor(.black)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Created Time")
                         .font(.title3)
                         .fontWeight(.semibold)
                         .foregroundColor(.black)
-                    Text(notification.createdTime)
+                    Text(order.formattedCreatedDate())
                         .font(.body)
                         .foregroundColor(.black)
                 }
-
-                if let expiresIn = notification.expiresIn {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Expires In")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.black)
-                        Text(expiresIn)
-                            .font(.body)
-                            .foregroundColor(.red)
-                    }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Expires In")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.black)
+                    Text(order.formattedExpiredDate())
+                        .font(.body)
+                        .foregroundColor(.red)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             Spacer()
-
+            
             VStack(spacing: 10) {
                 Button(action: {
                     print("Tapped")
@@ -178,9 +201,8 @@ struct NotificationDetailsDialog: View {
                         .background(Color.green)
                         .cornerRadius(8)
                 }
-
+                
                 Button(action: {
-                    print("Do it later")
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("Do It Later")
@@ -190,7 +212,7 @@ struct NotificationDetailsDialog: View {
                         .background(Color.yellow)
                         .cornerRadius(8)
                 }
-
+                
                 Button(action: {
                     print("Rejected")
                 }) {
@@ -211,49 +233,3 @@ struct NotificationDetailsDialog: View {
         .padding()
     }
 }
-
-struct Notification: Identifiable {
-    let id = UUID()
-    let amount: String
-    let card: String
-    let order: String
-    let createdTime: String
-    let expiresIn: String?
-    let status: NotificationStatus
-}
-
-enum NotificationStatus {
-    case pending
-    case confirmed
-    case timeout
-
-    var color: Color {
-        switch self {
-        case .pending: return Color.yellow.opacity(0.3)
-        case .confirmed: return Color.green.opacity(0.3)
-        case .timeout: return Color.gray.opacity(0.3)
-        }
-    }
-
-    var statusText: String {
-        switch self {
-        case .pending: return "PENDING"
-        case .confirmed: return "CONFIRMED"
-        case .timeout: return "TIME-OUT"
-        }
-    }
-
-    var statusIcon: String {
-        switch self {
-        case .pending: return "info.circle"
-        case .confirmed: return "checkmark.circle"
-        case .timeout: return "xmark.circle"
-        }
-    }
-}
-
-let notifications = [
-    Notification(amount: "$493.64", card: "5526", order: "0022149855633253", createdTime: "2024-12-23 17:24:56", expiresIn: "9m 56s", status: .pending),
-    Notification(amount: "$128.35", card: "3658", order: "9855856233523256", createdTime: "2024-12-23 17:24:56", expiresIn: nil, status: .confirmed),
-    Notification(amount: "$328.05", card: "3648", order: "1644856233521652", createdTime: "2024-12-23 17:24:56", expiresIn: nil, status: .timeout)
-]

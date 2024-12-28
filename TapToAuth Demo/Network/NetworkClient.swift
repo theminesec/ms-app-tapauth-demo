@@ -17,6 +17,7 @@ class NetworkClient {
     enum API {
         case login
         case fcmTokenUpload
+        case orders(cardNo: String)
 
         var path: String {
             switch self {
@@ -24,6 +25,8 @@ class NetworkClient {
                 return Constants.APIEndpoints.login
             case .fcmTokenUpload:
                 return Constants.APIEndpoints.fcmTokenUpload
+            case .orders(let cardNo):
+                return String(format: Constants.APIEndpoints.orders, cardNo)
             }
         }
     }
@@ -69,6 +72,23 @@ class NetworkClient {
                 completion(.failure(error))
                 return
             }
+            
+//            if let httpResponse = response as? HTTPURLResponse {
+//                       if httpResponse.statusCode == 404 {
+//                           // Mock response for testing
+//                           if let mockData = mockOrdersResponse() {
+//                               logResponse(url: url, response: response, data: mockData)
+//                               do {
+//                                   let decodedData = try JSONDecoder().decode(T.self, from: mockData)
+//                                   completion(.success(decodedData))
+//                               } catch {
+//                                   logError("Decoding mock data failed: \(error.localizedDescription)")
+//                                   completion(.failure(error))
+//                               }
+//                               return
+//                           }
+//                       }
+//                   }
             
             guard let data = data else {
                 logError("No data received for \(url)")
@@ -130,4 +150,51 @@ class NetworkClient {
         case noData
         case encodingFailed
     }
+}
+
+
+// MARK: - Mock Data
+private func mockOrdersResponse() -> Data? {
+    let mockJSON = """
+    {
+      "code": 0,
+      "message": "success",
+      "body": {
+        "list": [
+          {
+            "actionId": "1000000000",
+            "orderId": "985585623352366",
+            "description": "new order with 100inches flat screen",
+            "amount": "128.35",
+            "fullCardNo": "6217445869663658",
+            "created": 1633660800,
+            "expired": 1633662600,
+            "status": "PENDING"
+          },
+          {
+            "actionId": "1000000001",
+            "orderId": "985585623352367",
+            "description": "new order with 100inches flat screen",
+            "amount": "138.35",
+            "fullCardNo": "6217445869663658",
+            "created": 1633660800,
+            "expired": 1633662600,
+            "status": "PENDING"
+          },
+          {
+            "actionId": "1000000002",
+            "orderId": "985585623352368",
+            "description": "new order with 100inches flat screen",
+            "amount": "148.35",
+            "fullCardNo": "6217445869663658",
+            "created": 1633660800,
+            "expired": 1633662600,
+            "status": "PENDING"
+          }
+        ],
+        "total": 3
+      }
+    }
+    """
+    return mockJSON.data(using: .utf8)
 }

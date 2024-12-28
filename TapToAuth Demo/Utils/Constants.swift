@@ -14,5 +14,6 @@ struct Constants {
         static let baseURL = "https://tap-auth.mspayhub.com/"
         static let login = "v1/login"
         static let fcmTokenUpload = "v1/fcmTokenUpload"
+        static let orders = "v1/orders/%@"
     }
 }
