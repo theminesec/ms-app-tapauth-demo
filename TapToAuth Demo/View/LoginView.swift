@@ -9,6 +9,8 @@ import SwiftUI
 
 struct LoginView: View {
     @State private var name: String = ""
+    @State private var cardNumber: String = ""
+    @State private var showCardAlert: Bool = false
     @StateObject private var viewModel = LoginViewModel()
     @State private var isLoading: Bool = false
 
@@ -40,8 +42,12 @@ struct LoginView: View {
 
                     Button(action: {
                         hideKeyboard()
-                        isLoading = true
-                        viewModel.startLoginProcess(userName: name)
+                        if name == "test_user" {
+                            showCardAlert = true
+                        } else {
+                            isLoading = true
+                            viewModel.startLoginProcess(userName: name)
+                        }
                     }) {
                         Text("Tap Card to Login")
                             .font(.system(size: 18, weight: .bold))
@@ -62,6 +68,14 @@ struct LoginView: View {
                     Spacer()
                 }
                 .padding(.top, 100)
+                .alert("Enter Card Number", isPresented: $showCardAlert) {
+                    SecureField("Card Number", text: $cardNumber)
+                        .keyboardType(.numberPad)
+                    Button("Submit", action: submitCardNumber)
+                    Button("Cancel", role: .cancel, action: { cardNumber = "" })
+                } message: {
+                    Text("Please enter your card number to proceed.")
+                }
             }
             .navigationDestination(isPresented: $viewModel.isLoggedIn) {
                 ContentView()
@@ -69,8 +83,16 @@ struct LoginView: View {
         }
     }
     
+    private func submitCardNumber() {
+        guard !cardNumber.isEmpty else {
+            print("Card number is empty.")
+            return
+        }
+        isLoading = true
+        viewModel.performLogin(userName: name, cardNo: cardNumber)
+    }
+
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
-    
 }
