@@ -24,6 +24,11 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
         application.registerForRemoteNotifications()
         Messaging.messaging().delegate = self
+        
+        if let notification = launchOptions?[.remoteNotification] as? [String: AnyObject] {
+            handleNotification(notification)
+        }
+
         return true
     }
     
@@ -45,8 +50,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
-        print("User tapped notification: \(userInfo)")
+        handleNotification(userInfo)
         completionHandler()
+    }
+    
+    private func handleNotification(_ userInfo: [AnyHashable: Any]) {
+        print("User tapped notification: \(userInfo)")
+        NotificationCenter.default.post(name: .navigateToNotifications, object: nil)
     }
 }
 
@@ -65,4 +75,9 @@ struct TapToAuth_DemoApp: App {
             }
         }
     }
+}
+
+
+extension Notification.Name {
+    static let navigateToNotifications = Notification.Name("NavigateToNotifications")
 }

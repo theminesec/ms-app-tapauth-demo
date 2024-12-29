@@ -54,11 +54,11 @@ enum ActionStatus: String, Codable {
 
     var color: Color {
         switch self {
-        case .pending: return Color.yellow.opacity(0.3)
-        case .confirmed: return Color.green.opacity(0.3)
-        case .rejected: return Color.red.opacity(0.3)
-        case .cancelled: return Color.gray.opacity(0.3)
-        case .timeout: return Color.orange.opacity(0.3)
+        case .pending: return Color.yellow.opacity(0.4)
+        case .confirmed: return Color.green.opacity(0.4)
+        case .rejected: return Color.red.opacity(0.4)
+        case .cancelled: return Color.gray.opacity(0.4)
+        case .timeout: return Color.orange.opacity(0.4)
         }
     }
 
