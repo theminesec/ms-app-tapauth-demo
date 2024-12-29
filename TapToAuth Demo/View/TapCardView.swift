@@ -9,21 +9,20 @@ import SwiftUI
 import AVKit
 
 struct TapCardView: View {
-    let userName: String
+    let amount: String
     @Environment(\.colorScheme) var colorScheme
     @State private var player: AVPlayer?
     @State private var countdown: Int = 10
-    @State private var navigateToHome: Bool = false
 
     var body: some View {
         VStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Tap & Login")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.gray)
-                Text("tap your card to login")
+                Text("Total amount")
                     .font(.system(size: 16))
                     .foregroundColor(.gray)
+                Text("$\(amount)")
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.black)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
@@ -56,7 +55,7 @@ struct TapCardView: View {
             Spacer()
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Tap to Login")
+                Text("Tap to Pay")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.black)
                 Text("Tap and hold card to the back of device")
@@ -84,9 +83,6 @@ struct TapCardView: View {
             
         }
         .background(Color.white.edgesIgnoringSafeArea(.all))
-        .navigationDestination(isPresented: $navigateToHome) {
-            HomeView(userName: userName)
-        }
     }
 
     private func setupPlayerLooping() {
@@ -107,7 +103,6 @@ struct TapCardView: View {
                 countdown -= 1
             } else {
                 timer.invalidate()
-                navigateToHome = true
             }
         }
     }

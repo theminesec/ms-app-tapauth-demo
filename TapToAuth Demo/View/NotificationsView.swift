@@ -10,17 +10,21 @@ import SwiftUI
 struct NotificationsView: View {
     @State private var selectedOrder: Order? = nil
     @StateObject private var viewModel = NotificationsViewModel()
-    
+    @State private var showTapCardView = false
+    @State private var selectedAmount: String = ""
+
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 VStack(alignment: .leading) {
+                    // Title
                     Text("Messages")
                         .font(.title)
                         .fontWeight(.bold)
                         .padding(.leading)
                         .padding(.top)
 
+                    // Content
                     if viewModel.orders.isEmpty && !viewModel.isLoading {
                         VStack {
                             Spacer()
@@ -44,17 +48,33 @@ struct NotificationsView: View {
                         .listStyle(PlainListStyle())
                     }
                 }
-                .navigationBarHidden(true)
                 .onAppear {
                     viewModel.fetchOrders(for: retrieveUser()?.cardNo ?? "")
                 }
                 .sheet(item: $selectedOrder) { order in
-                    OrderDetailsDialog(order: order)
+                    OrderDetailsDialog(
+                        order: order,
+                        viewModel: viewModel,
+                        selectedAmount: $selectedAmount,
+                        showTapCardView: {
+                            // Ensure selectedAmount is updated before showing TapCardView
+                            selectedAmount = order.amount
+                            DispatchQueue.main.async {
+                                showTapCardView = true
+                                selectedOrder = nil // Dismiss the sheet
+                            }
+                        }
+                    )
                 }
-                
-                // Loading Indicator
+                .fullScreenCover(isPresented: $showTapCardView) {
+                    TapCardView(amount: selectedAmount)
+                        .interactiveDismissDisabled(false) // Prevent accidental dismissal
+                }
+
                 if viewModel.isLoading {
                     ZStack {
+                        Color.black.opacity(0.5)
+                            .edgesIgnoringSafeArea(.all)
                         ProgressView("Loading Orders...")
                             .progressViewStyle(CircularProgressViewStyle())
                             .foregroundColor(.white)
@@ -68,7 +88,7 @@ struct NotificationsView: View {
 
 struct OrderRow: View {
     let order: Order
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -84,7 +104,7 @@ struct OrderRow: View {
                         .foregroundColor(.gray)
                 }
             }
-            
+
             HStack {
                 Text("Card: \(order.fullCardNo)")
                     .font(.subheadline)
@@ -96,14 +116,16 @@ struct OrderRow: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
-            
-            Text("Created: \(order.formattedCreatedDate())")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-            
-            Text("Expires in: \(order.formattedExpiredDate())")
-                .font(.subheadline)
-                .foregroundColor(.red)
+
+            if order.status == .pending {
+                Text("Expires in: \(order.formattedExpiredDate())")
+                    .font(.subheadline)
+                    .foregroundColor(.red)
+            } else {
+                Text("Created: \(order.formattedCreatedDate())")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
         }
         .padding()
         .background(order.status.color)
@@ -114,8 +136,11 @@ struct OrderRow: View {
 
 struct OrderDetailsDialog: View {
     let order: Order
+    @ObservedObject var viewModel: NotificationsViewModel
     @Environment(\.presentationMode) var presentationMode
-    
+    var selectedAmount: Binding<String>
+    var showTapCardView: () -> Void
+
     var body: some View {
         VStack(spacing: 20) {
             Text("Order Details")
@@ -124,75 +149,26 @@ struct OrderDetailsDialog: View {
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top)
-            
+
             VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Order ID")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.black)
-                    Text(order.orderId)
-                        .font(.body)
-                        .foregroundColor(.black)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Description")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.black)
-                    Text(order.description)
-                        .font(.body)
-                        .foregroundColor(.black)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Amount")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.black)
-                    Text(order.amount)
-                        .font(.body)
-                        .foregroundColor(.black)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Card No")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.black)
-                    Text(order.fullCardNo)
-                        .font(.body)
-                        .foregroundColor(.black)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Created Time")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.black)
-                    Text(order.formattedCreatedDate())
-                        .font(.body)
-                        .foregroundColor(.black)
-                }
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Expires In")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.black)
-                    Text(order.formattedExpiredDate())
-                        .font(.body)
-                        .foregroundColor(.red)
+                detailRow(title: "Order ID", content: order.orderId)
+                detailRow(title: "Description", content: order.description)
+                detailRow(title: "Amount", content: order.amount)
+                detailRow(title: "Card No", content: order.fullCardNo)
+                if order.status == .pending {
+                    detailRow(title: "Expires In", content: order.formattedExpiredDate(), contentColor: .red)
+                } else {
+                    detailRow(title: "Created Time", content: order.formattedCreatedDate())
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             Spacer()
-            
+
             VStack(spacing: 10) {
                 Button(action: {
-                    print("Tapped")
+                    selectedAmount.wrappedValue = order.amount
+                    showTapCardView()
                 }) {
                     Text("Tap")
                         .frame(maxWidth: .infinity)
@@ -201,7 +177,7 @@ struct OrderDetailsDialog: View {
                         .background(Color.green)
                         .cornerRadius(8)
                 }
-                
+
                 Button(action: {
                     presentationMode.wrappedValue.dismiss()
                 }) {
@@ -212,9 +188,16 @@ struct OrderDetailsDialog: View {
                         .background(Color.yellow)
                         .cornerRadius(8)
                 }
-                
+
                 Button(action: {
-                    print("Rejected")
+                    viewModel.rejectOrder(actionId: order.actionId) { result in
+                        switch result {
+                        case .success:
+                            presentationMode.wrappedValue.dismiss()
+                        case .failure(let error):
+                            print("Failed to reject order: \(error.localizedDescription)")
+                        }
+                    }
                 }) {
                     Text("Reject")
                         .frame(maxWidth: .infinity)
@@ -231,5 +214,17 @@ struct OrderDetailsDialog: View {
         .cornerRadius(16)
         .shadow(radius: 8)
         .padding()
+    }
+
+    private func detailRow(title: String, content: String, contentColor: Color = .black) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+            Text(content)
+                .font(.body)
+                .foregroundColor(contentColor)
+        }
     }
 }

@@ -13,6 +13,10 @@ struct OrdersResponseBody: Codable {
     let total: Int
 }
 
+struct RejectResponseBody: Codable {
+    let action: Order
+}
+
 struct Order: Codable, Identifiable {
     let actionId: String
     let orderId: String
@@ -21,7 +25,7 @@ struct Order: Codable, Identifiable {
     let fullCardNo: String
     let created: Int
     let expired: Int
-    let status: ActionStatus
+    var status: ActionStatus
 
     // Conform to Identifiable
     var id: String { actionId }
