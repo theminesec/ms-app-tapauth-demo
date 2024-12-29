@@ -22,7 +22,7 @@ struct Order: Codable, Identifiable {
     let created: Int
     let expired: Int
     var status: ActionStatus
-
+    
     // Conform to Identifiable
     var id: String { actionId }
 
@@ -76,5 +76,9 @@ enum ActionStatus: String, Codable {
 typealias OrdersResponse = BaseResponse<OrdersResponseBody>
 
 struct ConfirmRequest: Codable {
-    let cardNo: String
+    let cardData: CardData
+
+    struct CardData: Codable {
+        let cardNo: String
+    }
 }

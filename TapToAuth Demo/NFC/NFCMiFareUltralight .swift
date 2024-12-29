@@ -18,7 +18,7 @@ class NFCMiFareUltralight: NSObject, NFCTagReaderSessionDelegate {
         }
 
         session = NFCTagReaderSession(pollingOption: .iso14443, delegate: self)
-        session?.alertMessage = "Hold your device near a Mifare Ultralight tag."
+        session?.alertMessage = "Hold your device near the MineSec Card."
         session?.begin()
     }
 

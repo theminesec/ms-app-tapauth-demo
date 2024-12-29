@@ -61,7 +61,7 @@ class NotificationsViewModel: ObservableObject {
     }
     
     func confirmOrder(actionId: String, cardNo: String, completion: @escaping (Result<Order, Error>) -> Void) {
-        let confirmRequest = ConfirmRequest(cardNo: cardNo)
+        let confirmRequest = ConfirmRequest(cardData: ConfirmRequest.CardData(cardNo: cardNo))
         NetworkClient.shared.post(
             endpoint: .confirm(actionId: actionId),
             body: confirmRequest,
