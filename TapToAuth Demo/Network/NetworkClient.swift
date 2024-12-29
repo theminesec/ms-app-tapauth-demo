@@ -19,7 +19,8 @@ class NetworkClient {
         case fcmTokenUpload
         case orders(cardNo: String)
         case reject(actionId: String)
-
+        case confirm(actionId: String)
+        
         var path: String {
             switch self {
             case .login:
@@ -30,6 +31,8 @@ class NetworkClient {
                 return String(format: Constants.APIEndpoints.orders, cardNo)
             case .reject(let actionId):
                 return String(format: Constants.APIEndpoints.reject, actionId)
+            case .confirm(let actionId):
+                return String(format: Constants.APIEndpoints.confirm, actionId)
             }
         }
     }
@@ -77,21 +80,21 @@ class NetworkClient {
             }
             
             if let httpResponse = response as? HTTPURLResponse {
-                       if httpResponse.statusCode == 404 {
-                           // Mock response for testing
-                           if let mockData = mockOrdersResponse() {
-                               logResponse(url: url, response: response, data: mockData)
-                               do {
-                                   let decodedData = try JSONDecoder().decode(T.self, from: mockData)
-                                   completion(.success(decodedData))
-                               } catch {
-                                   logError("Decoding mock data failed: \(error.localizedDescription)")
-                                   completion(.failure(error))
-                               }
-                               return
-                           }
-                       }
-                   }
+                if httpResponse.statusCode == 404 {
+                    // Mock response for testing
+                    if let mockData = mockOrdersResponse() {
+                        logResponse(url: url, response: response, data: mockData)
+                        do {
+                            let decodedData = try JSONDecoder().decode(T.self, from: mockData)
+                            completion(.success(decodedData))
+                        } catch {
+                            logError("Decoding mock data failed: \(error.localizedDescription)")
+                            completion(.failure(error))
+                        }
+                        return
+                    }
+                }
+            }
             
             guard let data = data else {
                 logError("No data received for \(url)")

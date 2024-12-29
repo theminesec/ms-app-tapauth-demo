@@ -13,10 +13,6 @@ struct OrdersResponseBody: Codable {
     let total: Int
 }
 
-struct RejectResponseBody: Codable {
-    let action: Order
-}
-
 struct Order: Codable, Identifiable {
     let actionId: String
     let orderId: String
@@ -78,3 +74,7 @@ enum ActionStatus: String, Codable {
 }
 
 typealias OrdersResponse = BaseResponse<OrdersResponseBody>
+
+struct ConfirmRequest: Codable {
+    let cardNo: String
+}

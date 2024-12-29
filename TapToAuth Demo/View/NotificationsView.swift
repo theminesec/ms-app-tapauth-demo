@@ -42,6 +42,7 @@ struct NotificationsView: View {
                                 .onTapGesture {
                                     if order.status == .pending {
                                         selectedOrder = order
+                                        viewModel.selectedOrder = order
                                     }
                                 }
                         }
@@ -67,8 +68,8 @@ struct NotificationsView: View {
                     )
                 }
                 .fullScreenCover(isPresented: $showTapCardView) {
-                    TapCardView(amount: selectedAmount)
-                        .interactiveDismissDisabled(false) // Prevent accidental dismissal
+                    TapCardView(viewModel: viewModel)
+                        .interactiveDismissDisabled(true)
                 }
 
                 if viewModel.isLoading {
