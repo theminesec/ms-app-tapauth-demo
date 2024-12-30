@@ -16,13 +16,28 @@ struct NotificationsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                Color.white.edgesIgnoringSafeArea(.all)
+                
                 VStack(alignment: .leading) {
+                    // Centered Logo
+                    HStack {
+                        Spacer()
+                        Image("logo_minesec_full")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 50)
+                        Spacer()
+                    }
+                    .padding(.top)
+
+                    Spacer().frame(height: 30)
+
                     // Title
                     Text("Messages")
                         .font(.title)
                         .fontWeight(.bold)
-                        .padding(.leading)
-                        .padding(.top)
+                        .foregroundColor(.black)
+                        .padding(.horizontal)
 
                     // Content
                     if viewModel.orders.isEmpty && !viewModel.isLoading {
@@ -45,8 +60,11 @@ struct NotificationsView: View {
                                         viewModel.selectedOrder = order
                                     }
                                 }
+                                .listRowBackground(Color.white) // Set the background color for each row
+                                .listRowSeparator(.hidden) // Hide the separator for each row
                         }
                         .listStyle(PlainListStyle())
+                        .scrollContentBackground(.hidden) // Hide the default background for the list
                     }
                 }
                 .onAppear {
@@ -58,11 +76,10 @@ struct NotificationsView: View {
                         viewModel: viewModel,
                         selectedAmount: $selectedAmount,
                         showTapCardView: {
-                            // Ensure selectedAmount is updated before showing TapCardView
                             selectedAmount = order.amount
                             DispatchQueue.main.async {
                                 showTapCardView = true
-                                selectedOrder = nil // Dismiss the sheet
+                                selectedOrder = nil
                             }
                         }
                     )
@@ -93,24 +110,34 @@ struct OrderRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(order.amount)
+                // Amount with Dollar Sign
+                Text("$\(order.amount)")
                     .font(.headline)
                     .fontWeight(.bold)
+                    .foregroundColor(.black)
+
                 Spacer()
+
+                // Status Icon and Status Text
                 HStack(spacing: 4) {
                     Image(systemName: order.status.statusIcon)
                         .foregroundColor(order.status.color)
                     Text(order.status.rawValue)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.black)
                 }
             }
 
             HStack {
-                Text("Card: \(order.fullCardNo)")
+                // Show only the last 4 digits of the card number
+                Text("Card: \(lastFourDigits(order.fullCardNo))")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.black)
+
                 Spacer()
+
+                // Order ID
                 Text("Order: \(order.orderId)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
@@ -119,19 +146,26 @@ struct OrderRow: View {
             }
 
             if order.status == .pending {
+                // Expiry Date
                 Text("Expires in: \(order.formattedExpiredDate())")
                     .font(.subheadline)
                     .foregroundColor(.red)
             } else {
+                // Created Date
                 Text("Created: \(order.formattedCreatedDate())")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
         }
         .padding()
-        .background(order.status.color)
+        .background(order.status.color.opacity(0.2))
         .cornerRadius(8)
-        .shadow(radius: 2)
+        .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+    }
+
+    private func lastFourDigits(_ cardNumber: String) -> String {
+        guard cardNumber.count >= 4 else { return "" }
+        return String(cardNumber.suffix(4))
     }
 }
 
@@ -154,7 +188,7 @@ struct OrderDetailsDialog: View {
             VStack(alignment: .leading, spacing: 16) {
                 detailRow(title: "Order ID", content: order.orderId)
                 detailRow(title: "Description", content: order.description)
-                detailRow(title: "Amount", content: order.amount)
+                detailRow(title: "Amount", content: "$\(order.amount)")
                 detailRow(title: "Card No", content: order.fullCardNo)
                 if order.status == .pending {
                     detailRow(title: "Expires In", content: order.formattedExpiredDate(), contentColor: .red)
@@ -212,8 +246,6 @@ struct OrderDetailsDialog: View {
         }
         .padding()
         .background(Color.white)
-        .cornerRadius(16)
-        .shadow(radius: 8)
         .padding()
     }
 

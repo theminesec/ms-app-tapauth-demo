@@ -4,7 +4,6 @@
 //
 //  Created by Admin on 19/12/2024.
 //
-
 import SwiftUI
 
 struct LoginView: View {
@@ -17,26 +16,32 @@ struct LoginView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.edgesIgnoringSafeArea(.all)
-
+                Color.white.edgesIgnoringSafeArea(.all)
+                
                 VStack(spacing: 20) {
+                    Image("logo_minesec_full")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 50)
+                        .padding(.top, 32)
+                    
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Welcome")
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(.white)
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(.black)
                         
                         Text("Login")
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(.white)
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(.black)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 32)
                     
-                    TextField("Enter your name", text: $name)
+                    TextField("", text: $name, prompt: Text("Enter your name").foregroundColor(.gray))
                         .padding()
-                        .background(Color.gray.opacity(0.2))
+                        .background(Color(red: 0.95, green: 0.95, blue: 0.95))
                         .cornerRadius(8)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                         .font(.system(size: 16))
                         .padding(.horizontal, 32)
 
@@ -51,7 +56,7 @@ struct LoginView: View {
                     }) {
                         Text("Tap Card to Login")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.green)
@@ -67,7 +72,7 @@ struct LoginView: View {
 
                     Spacer()
                 }
-                .padding(.top, 100)
+                .padding(.top, 50)
                 .alert("Enter Card Number", isPresented: $showCardAlert) {
                     SecureField("Card Number", text: $cardNumber)
                         .keyboardType(.numberPad)
