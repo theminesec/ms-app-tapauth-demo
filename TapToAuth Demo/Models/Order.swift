@@ -26,23 +26,14 @@ struct Order: Codable, Identifiable {
     // Conform to Identifiable
     var id: String { actionId }
 
-    // Format the created date
     func formattedCreatedDate() -> String {
-        return formatTimestamp(created)
+        return TimeInterval(created).getLocalFormattedTime()
     }
 
-    // Format the expiry date
-    func formattedExpiredDate() -> String {
-        return formatTimestamp(expired)
+    func formattedExpiredDate(enablePrefix: Bool = false) -> String {
+        return TimeInterval(expired).formatTimeRemaining(enablePrefix: enablePrefix)
     }
 
-    // Helper function to format a timestamp
-    private func formatTimestamp(_ timestamp: Int) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter.string(from: Date(timeIntervalSince1970: TimeInterval(timestamp)))
-    }
 }
 
 enum ActionStatus: String, Codable {
