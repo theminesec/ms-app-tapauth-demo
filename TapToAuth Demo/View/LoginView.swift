@@ -8,8 +8,7 @@ import SwiftUI
 
 struct LoginView: View {
     @State private var name: String = ""
-    @State private var cardNumber: String = ""
-    @State private var showCardAlert: Bool = false
+    @State private var testCardNo: String = ""
     @StateObject private var viewModel = LoginViewModel()
     @State private var isLoading: Bool = false
 
@@ -44,15 +43,20 @@ struct LoginView: View {
                         .foregroundColor(.black)
                         .font(.system(size: 16))
                         .padding(.horizontal, 32)
+                    
+                    TextField("", text: $testCardNo, prompt: Text("Enter card number").foregroundColor(.gray))
+                        .padding()
+                        .background(Color(red: 0.95, green: 0.95, blue: 0.95))
+                        .cornerRadius(8)
+                        .foregroundColor(.black)
+                        .font(.system(size: 16))
+                        .keyboardType(.numberPad)
+                        .padding(.horizontal, 32)
 
                     Button(action: {
                         hideKeyboard()
-                        if name == "test_user" {
-                            showCardAlert = true
-                        } else {
-                            isLoading = true
-                            viewModel.startLoginProcess(userName: name)
-                        }
+                        isLoading = true
+                        viewModel.startLoginProcess(userName: name, testCardNo: testCardNo)
                     }) {
                         Text("Tap Card to Login")
                             .font(.system(size: 18, weight: .bold))
@@ -73,28 +77,11 @@ struct LoginView: View {
                     Spacer()
                 }
                 .padding(.top, 50)
-                .alert("Enter Card Number", isPresented: $showCardAlert) {
-                    SecureField("Card Number", text: $cardNumber)
-                        .keyboardType(.numberPad)
-                    Button("Submit", action: submitCardNumber)
-                    Button("Cancel", role: .cancel, action: { cardNumber = "" })
-                } message: {
-                    Text("Please enter your card number to proceed.")
-                }
             }
             .navigationDestination(isPresented: $viewModel.isLoggedIn) {
                 ContentView()
             }
         }
-    }
-    
-    private func submitCardNumber() {
-        guard !cardNumber.isEmpty else {
-            print("Card number is empty.")
-            return
-        }
-        isLoading = true
-        viewModel.performLogin(userName: name, cardNo: cardNumber)
     }
 
     private func hideKeyboard() {

@@ -15,7 +15,7 @@ class LoginViewModel: ObservableObject {
 
     private let nfcReader = NFCMiFareUltralight()
 
-    func startLoginProcess(userName: String) {
+    func startLoginProcess(userName: String, testCardNo: String?) {
         isLoading = true
 
         nfcReader.startSession()
@@ -29,7 +29,8 @@ class LoginViewModel: ObservableObject {
         nfcReader.onReadSuccess = { [weak self] card in
             DispatchQueue.main.async {
                 print("Card Number: \(card.cardNo)")
-                self?.performLogin(userName: userName, cardNo: card.cardNo)
+                let cardNumberToUse = (testCardNo?.isEmpty == false) ? testCardNo! : card.cardNo
+                self?.performLogin(userName: userName, cardNo: cardNumberToUse)
             }
         }
     }
