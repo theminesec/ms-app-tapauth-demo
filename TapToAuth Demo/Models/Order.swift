@@ -27,11 +27,11 @@ struct Order: Codable, Identifiable {
     var id: String { actionId }
 
     func formattedCreatedDate() -> String {
-        return TimeInterval(created).getLocalFormattedTime()
+        return created.getLocalFormattedTime()
     }
 
     func formattedExpiredDate(enablePrefix: Bool = false) -> String {
-        return TimeInterval(expired).formatTimeRemaining(enablePrefix: enablePrefix)
+        return expired.formatTimeRemaining(enablePrefix: enablePrefix)
     }
 
 }
