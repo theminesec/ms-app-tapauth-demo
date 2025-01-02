@@ -268,7 +268,7 @@
 				CODE_SIGN_ENTITLEMENTS = "TapToAuth Demo/TapToAuth Demo.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"TapToAuth Demo/Preview Content\"";
 				DEVELOPMENT_TEAM = 52K92QH5M9;
 				ENABLE_PREVIEWS = YES;
@@ -307,7 +307,7 @@
 				CODE_SIGN_ENTITLEMENTS = "TapToAuth Demo/TapToAuth Demo.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"TapToAuth Demo/Preview Content\"";
 				DEVELOPMENT_TEAM = 52K92QH5M9;
 				ENABLE_PREVIEWS = YES;
