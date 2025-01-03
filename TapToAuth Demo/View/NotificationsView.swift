@@ -106,7 +106,9 @@ struct NotificationsView: View {
 
 struct OrderRow: View {
     let order: Order
-
+    @State private var remainingTime: String = ""
+    @State private var timer: Timer?
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -147,9 +149,10 @@ struct OrderRow: View {
 
             if order.status == .pending {
                 // Expiry Date
-                Text("Expires in: \(order.formattedExpiredDate())")
+                Text("Expires in: \(remainingTime)")
                     .font(.subheadline)
                     .foregroundColor(.red)
+                    .onAppear(perform: startCountdown)
             } else {
                 // Created Date
                 Text("Created: \(order.formattedCreatedDate())")
@@ -167,6 +170,17 @@ struct OrderRow: View {
         guard cardNumber.count >= 4 else { return "" }
         return String(cardNumber.suffix(4))
     }
+    
+    private func startCountdown() {
+        updateRemainingTime()
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            updateRemainingTime()
+        }
+    }
+    
+    private func updateRemainingTime() {
+        remainingTime = order.formattedExpiredDate()
+    }
 }
 
 struct OrderDetailsDialog: View {
@@ -175,6 +189,7 @@ struct OrderDetailsDialog: View {
     @Environment(\.presentationMode) var presentationMode
     var selectedAmount: Binding<String>
     var showTapCardView: () -> Void
+    @State private var remainingTime: String = ""
 
     var body: some View {
         VStack(spacing: 20) {
@@ -191,7 +206,8 @@ struct OrderDetailsDialog: View {
                 detailRow(title: "Amount", content: "$\(order.amount)")
                 detailRow(title: "Card No", content: order.fullCardNo)
                 if order.status == .pending {
-                    detailRow(title: "Expires In", content: order.formattedExpiredDate(), contentColor: .red)
+                    detailRow(title: "Expires In", content: remainingTime, contentColor: .red)
+                        .onAppear(perform: startCountdown)
                 } else {
                     detailRow(title: "Created Time", content: order.formattedCreatedDate())
                 }
@@ -259,5 +275,16 @@ struct OrderDetailsDialog: View {
                 .font(.body)
                 .foregroundColor(contentColor)
         }
+    }
+    
+    private func startCountdown() {
+        updateRemainingTime()
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            updateRemainingTime()
+        }
+    }
+    
+    private func updateRemainingTime() {
+        remainingTime = order.formattedExpiredDate()
     }
 }

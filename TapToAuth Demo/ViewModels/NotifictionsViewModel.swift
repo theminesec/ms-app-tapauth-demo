@@ -26,7 +26,7 @@ class NotificationsViewModel: ObservableObject {
                 switch result {
                 case .success(let response):
                     if response.code == 0 {
-                        self?.orders = response.body.list
+                        self?.orders = response.body.list.sorted { $0.created > $1.created }
                     } else {
                         self?.errorMessage = response.message
                     }
