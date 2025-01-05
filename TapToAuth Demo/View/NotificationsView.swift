@@ -199,10 +199,18 @@ struct OrderDetailsDialog: View {
                 .padding(.top)
             
             VStack(alignment: .leading, spacing: 16) {
+                detailRow(title: "Action ID", content: order.actionId)
                 detailRow(title: "Order ID", content: order.orderId)
                 detailRow(title: "Description", content: order.description)
                 detailRow(title: "Amount", content: "$\(order.amount)")
                 detailRow(title: "Card No", content: order.fullCardNo)
+                
+                if order.status == .pending {
+                    detailRow(title: "Expires In", content: remainingTime, contentColor: .red)
+                        .onAppear(perform: startCountdown)
+                } else {
+                    detailRow(title: "Created Time", content: order.formattedCreatedDate())
+                }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Status")
@@ -212,13 +220,6 @@ struct OrderDetailsDialog: View {
                     Text(order.status.rawValue)
                         .font(.body)
                         .foregroundColor(order.status.color)
-                }
-                
-                if order.status == .pending {
-                    detailRow(title: "Expires In", content: remainingTime, contentColor: .red)
-                        .onAppear(perform: startCountdown)
-                } else {
-                    detailRow(title: "Created Time", content: order.formattedCreatedDate())
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
