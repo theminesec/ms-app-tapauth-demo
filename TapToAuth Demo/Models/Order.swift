@@ -71,5 +71,6 @@ struct ConfirmRequest: Codable {
 
     struct CardData: Codable {
         let cardNo: String
+        let cardUid: String
     }
 }

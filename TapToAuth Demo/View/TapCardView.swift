@@ -132,7 +132,7 @@ struct TapCardView: View {
     private func startNFCSession() {
         nfcReader.onReadSuccess = { card in
             print("Card scanned successfully: \(card.cardNo)")
-            viewModel.confirmOrder(actionId: viewModel.selectedOrder!.actionId, cardNo: card.cardNo){ result in
+            viewModel.confirmOrder(actionId: viewModel.selectedOrder!.actionId, cardUid: card.uid, cardNo: card.cardNo){ result in
                 switch result {
                 case .success:
                     dismiss()

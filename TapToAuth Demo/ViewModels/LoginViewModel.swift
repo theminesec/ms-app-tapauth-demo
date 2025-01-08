@@ -28,13 +28,13 @@ class LoginViewModel: ObservableObject {
 
         nfcReader.onReadSuccess = { [weak self] card in
             DispatchQueue.main.async {
-                print("Card Number: \(card.cardNo)")
-                self?.performLogin(userName: userName, cardNo: card.cardNo)
+                print("Card UID: \(card.uid)")
+                self?.performLogin(userName: userName, cardUid: card.uid, cardNo: card.cardNo)
             }
         }
     }
 
-    func performLogin(userName: String, cardNo: String) {
+    func performLogin(userName: String, cardUid: String, cardNo: String) {
         Messaging.messaging().token { [weak self] token, error in
             guard let self = self else { return }
             if let error = error {
@@ -48,7 +48,7 @@ class LoginViewModel: ObservableObject {
                 return
             }
 
-            let loginRequest = LoginRequest(userName: userName, cardNo: cardNo)
+            let loginRequest = LoginRequest(userName: userName, cardUid: cardUid, cardNo: cardNo)
             NetworkClient.shared.post(
                 endpoint: .login,
                 body: loginRequest,
@@ -58,8 +58,9 @@ class LoginViewModel: ObservableObject {
                     switch result {
                     case .success(let response):
                         if response.code == 0 {
-                            saveUser(userName: userName, cardNo: cardNo, token: response.body.token)
-                            self.uploadFcmToken(cardNo: cardNo, token: fcmToken, userName: userName)
+                            let user = response.body
+                            saveUser(userName: user.userName, cardUid: user.cardUid, cardNo: user.cardNo, token: user.token)
+                            self.uploadFcmToken(cardNo: user.cardNo, token: fcmToken)
                             self.alertMessage = response.message
                             self.isLoading = false
                         }
@@ -72,7 +73,7 @@ class LoginViewModel: ObservableObject {
         }
     }
 
-    private func uploadFcmToken(cardNo: String, token: String, userName: String) {
+    private func uploadFcmToken(cardNo: String, token: String) {
         let fcmRequest = FcmTokenRequest(cardNo: cardNo, fcmToken: token)
         NetworkClient.shared.post(
             endpoint: .fcmTokenUpload,

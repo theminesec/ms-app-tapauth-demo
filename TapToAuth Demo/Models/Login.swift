@@ -7,11 +7,13 @@
 
 struct User: Codable {
     let userName: String
+    let cardUid: String
     let cardNo: String
     let token: String
 }
 
 struct LoginRequest: Codable {
     let userName: String
+    let cardUid: String
     let cardNo: String
 }

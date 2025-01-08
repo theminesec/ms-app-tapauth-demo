@@ -94,7 +94,7 @@ struct LoginView: View {
             return
         }
         isLoading = true
-        viewModel.performLogin(userName: name, cardNo: cardNumber)
+        viewModel.performLogin(userName: name, cardUid: cardNumber, cardNo: cardNumber)
     }
 
     private func hideKeyboard() {

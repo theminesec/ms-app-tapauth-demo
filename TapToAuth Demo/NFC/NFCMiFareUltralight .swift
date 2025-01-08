@@ -46,51 +46,33 @@ class NFCMiFareUltralight: NSObject, NFCTagReaderSessionDelegate {
             }
             
             switch tag {
+            case .iso7816(let iso7816Tag):
+                self.handleIso7816Tag(iso7816Tag, session: session)
             case .miFare(let miFareTag):
-                self.readMifareUltralightTag(miFareTag, session: session)
+                self.handleMiFareTag(miFareTag, session: session)
             default:
-                session.invalidate(errorMessage: "Tag is not a Mifare Ultralight card.")
-                self.onReadFailure?("Tag is not a Mifare Ultralight card.")
+                session.invalidate(errorMessage: "Unsupported tag type.")
+                self.onReadFailure?("Unsupported tag type.")
             }
         }
     }
     
-    private func readMifareUltralightTag(_ miFareTag: NFCMiFareTag, session: NFCTagReaderSession) {
-        let startPage: UInt8 = 4
-        let numberOfPages = 3
-        let readCommand = Data([0x30, startPage])
+    private func handleIso7816Tag(_ iso7816Tag: NFCISO7816Tag, session: NFCTagReaderSession) {
+        let uid = iso7816Tag.identifier.map { String(format: "%02X", $0) }.joined()
         
-        miFareTag.sendMiFareCommand(commandPacket: readCommand) { [weak self] response, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                session.invalidate(errorMessage: "Read failed: \(error.localizedDescription)")
-                self.onReadFailure?("Read failed: \(error.localizedDescription)")
-                return
-            }
-            
-            if response.count < (numberOfPages * 4) {
-                session.invalidate(errorMessage: "Invalid data read from card.")
-                self.onReadFailure?("Invalid data read from card.")
-                return
-            }
-            
-            let page4 = response[0..<4].map { String(format: "%02X", $0) }.joined()
-            let page5 = response[4..<8].map { String(format: "%02X", $0) }.joined()
-            let page6 = response[8..<12].map { String(format: "%02X", $0) }.joined()
-            
-            let cardNumber = "\(page4)\(page5)\(page6)".replacingOccurrences(of: "F", with: "")
-            
-            let uid = miFareTag.identifier.map { String(format: "%02X", $0) }.joined()
-            let rawData = response.map { String(format: "%02X", $0) }.joined()
-            let rawBytes = response.map { String(format: "0x%02X", $0) }
-            print("Raw Bytes in Hex: \(rawBytes)")
-            print("card \(cardNumber) => raw \(rawData)")
-            
-            session.invalidate()
-            
-            self.onReadSuccess?(MifareUltraCard(uid: uid, cardNo: cardNumber, data: rawData))
-        }
+        session.invalidate()
+
+        let card = MifareUltraCard(uid: uid, cardNo: "", data: "")
+        self.onReadSuccess?(card)
+    }
+    
+    private func handleMiFareTag(_ miFareTag: NFCMiFareTag, session: NFCTagReaderSession) {
+        let uid = miFareTag.identifier.map { String(format: "%02X", $0) }.joined()
+        
+        session.invalidate()
+        
+        let card = MifareUltraCard(uid: uid, cardNo: "", data: "")
+        self.onReadSuccess?(card)
     }
 }
 
