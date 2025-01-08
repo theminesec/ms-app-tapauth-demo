@@ -35,6 +35,7 @@ class LoginViewModel: ObservableObject {
     }
 
     func performLogin(userName: String, cardUid: String, cardNo: String) {
+        
         Messaging.messaging().token { [weak self] token, error in
             guard let self = self else { return }
             if let error = error {

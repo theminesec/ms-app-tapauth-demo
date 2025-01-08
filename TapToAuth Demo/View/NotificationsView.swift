@@ -63,6 +63,9 @@ struct NotificationsView: View {
                         }
                         .listStyle(PlainListStyle())
                         .scrollContentBackground(.hidden)
+                        .refreshable {
+                            await refreshNotifications()
+                        }
                     }
                 }
                 .onAppear {
@@ -97,6 +100,14 @@ struct NotificationsView: View {
                             .padding()
                     }
                 }
+            }
+        }
+    }
+    
+    private func refreshNotifications() async {
+        await withCheckedContinuation { continuation in
+            viewModel.fetchOrders(for: retrieveUser()?.cardNo ?? "") {
+                continuation.resume()
             }
         }
     }

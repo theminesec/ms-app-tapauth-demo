@@ -11,7 +11,6 @@ func retrieveUser() -> User? {
     if let savedData = UserDefaults.standard.data(forKey: Constants.UserDefaultsKeys.user) {
         do {
             let decodedUser = try JSONDecoder().decode(User.self, from: savedData)
-            print("The saved user is \(decodedUser)")
             return decodedUser
         } catch {
             print("Failed to decode user: \(error.localizedDescription)")

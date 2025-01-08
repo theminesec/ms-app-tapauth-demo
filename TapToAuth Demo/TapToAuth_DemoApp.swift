@@ -14,6 +14,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
+
+        // Register NetworkLogger
+        let configuration = URLSessionConfiguration.default
+        configuration.protocolClasses = [NetworkLogger.self] + (configuration.protocolClasses ?? [])
+        URLSession.shared.configuration.protocolClasses = configuration.protocolClasses
+
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             if let error = error {

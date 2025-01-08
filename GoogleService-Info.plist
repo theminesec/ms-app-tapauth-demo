@@ -26,5 +26,7 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:943156638374:ios:f44c14cc0f566905c6fa67</string>
+	<key>DATABASE_URL</key>
+	<string>https://msa-messaging-default-rtdb.asia-southeast1.firebasedatabase.app</string>
 </dict>
 </plist>

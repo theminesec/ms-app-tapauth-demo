@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import FirebaseDatabase
+import Foundation
 
 class NetworkClient {
     static let shared = NetworkClient()
@@ -13,7 +15,8 @@ class NetworkClient {
     private init() {}
     
     private let baseURL = Constants.APIEndpoints.baseURL
-    
+    private let logger = NetworkLogger.shared // Initialize the logger
+
     enum API {
         case login
         case fcmTokenUpload
@@ -52,7 +55,11 @@ class NetworkClient {
         completion: @escaping (Result<T, Error>) -> Void
     ) {
         guard let url = URL(string: baseURL + endpoint.path) else {
-            logError("Invalid URL: \(baseURL + endpoint.path)")
+            // Generate a dynamic Firebase node ID
+            let firebaseNodeID = logger.generateFirebaseNodeID()
+            
+            // Log the error with the node ID
+            logger.logError(message: "Invalid URL: \(baseURL + endpoint.path)", firebaseNodeID: firebaseNodeID)
             completion(.failure(NetworkError.invalidURL))
             return
         }
@@ -70,11 +77,16 @@ class NetworkClient {
             request.httpBody = body
         }
         
-        logRequest(url: url, method: httpMethod.rawValue, body: body)
+        // Generate a dynamic Firebase node ID
+        let firebaseNodeID = logger.generateFirebaseNodeID()
+        
+        // Log the request with the node ID
+        logger.logRequest(request: request, firebaseNodeID: firebaseNodeID)
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                logError("Request failed: \(error.localizedDescription)")
+                // Log the error with the node ID
+                self.logger.logError(message: "Request failed: \(error.localizedDescription)", firebaseNodeID: firebaseNodeID)
                 completion(.failure(error))
                 return
             }
@@ -83,12 +95,13 @@ class NetworkClient {
                 if httpResponse.statusCode == 404 {
                     // Mock response for testing
                     if let mockData = mockOrdersResponse() {
-                        logResponse(url: url, response: response, data: mockData)
+                        self.logger.logResponse(response: httpResponse, data: mockData, firebaseNodeID: firebaseNodeID)
                         do {
                             let decodedData = try JSONDecoder().decode(T.self, from: mockData)
                             completion(.success(decodedData))
                         } catch {
-                            logError("Decoding mock data failed: \(error.localizedDescription)")
+                            // Log the error with the node ID
+                            self.logger.logError(message: "Decoding mock data failed: \(error.localizedDescription)", firebaseNodeID: firebaseNodeID)
                             completion(.failure(error))
                         }
                         return
@@ -97,18 +110,23 @@ class NetworkClient {
             }
             
             guard let data = data else {
-                logError("No data received for \(url)")
+                // Log the error with the node ID
+                self.logger.logError(message: "No data received for \(url)", firebaseNodeID: firebaseNodeID)
                 completion(.failure(NetworkError.noData))
                 return
             }
             
-            logResponse(url: url, response: response, data: data)
+            // Log the response with the node ID
+            if let httpResponse = response as? HTTPURLResponse {
+                self.logger.logResponse(response: httpResponse, data: data, firebaseNodeID: firebaseNodeID)
+            }
             
             do {
                 let decodedData = try JSONDecoder().decode(T.self, from: data)
                 completion(.success(decodedData))
             } catch {
-                logError("Decoding failed for \(url): \(error.localizedDescription)")
+                // Log the error with the node ID
+                self.logger.logError(message: "Decoding failed for \(url): \(error.localizedDescription)", firebaseNodeID: firebaseNodeID)
                 completion(.failure(error))
             }
         }
@@ -146,7 +164,6 @@ class NetworkClient {
                 completion: completion
             )
         } catch {
-            logError("Encoding failed for \(endpoint.path): \(error.localizedDescription)")
             completion(.failure(NetworkError.encodingFailed))
         }
     }

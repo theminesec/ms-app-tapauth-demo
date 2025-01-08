@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8413DA0D2D2EAD0000A71B89 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 8413DA0C2D2EAD0000A71B89 /* FirebaseCore */; };
+		8413DA0F2D2EAD0000A71B89 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8413DA0E2D2EAD0000A71B89 /* FirebaseDatabase */; };
 		84A763D42D16004F0029EF63 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 84A763D32D16004F0029EF63 /* FirebaseAnalytics */; };
 		84A763D62D16004F0029EF63 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 84A763D52D16004F0029EF63 /* FirebaseMessaging */; };
 		84A763DB2D16026C0029EF63 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 84A763DA2D16026C0029EF63 /* GoogleService-Info.plist */; };
@@ -31,6 +33,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				84A763D62D16004F0029EF63 /* FirebaseMessaging in Frameworks */,
+				8413DA0D2D2EAD0000A71B89 /* FirebaseCore in Frameworks */,
+				8413DA0F2D2EAD0000A71B89 /* FirebaseDatabase in Frameworks */,
 				84A763D42D16004F0029EF63 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -77,6 +81,8 @@
 			packageProductDependencies = (
 				84A763D32D16004F0029EF63 /* FirebaseAnalytics */,
 				84A763D52D16004F0029EF63 /* FirebaseMessaging */,
+				8413DA0C2D2EAD0000A71B89 /* FirebaseCore */,
+				8413DA0E2D2EAD0000A71B89 /* FirebaseDatabase */,
 			);
 			productName = "TapToAuth Demo";
 			productReference = 84506AEF2D12E2AD004AE72E /* TapToAuth Demo.app */;
@@ -268,7 +274,7 @@
 				CODE_SIGN_ENTITLEMENTS = "TapToAuth Demo/TapToAuth Demo.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"TapToAuth Demo/Preview Content\"";
 				DEVELOPMENT_TEAM = 52K92QH5M9;
 				ENABLE_PREVIEWS = YES;
@@ -285,7 +291,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.theminesec.tapauth.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -307,7 +313,7 @@
 				CODE_SIGN_ENTITLEMENTS = "TapToAuth Demo/TapToAuth Demo.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"TapToAuth Demo/Preview Content\"";
 				DEVELOPMENT_TEAM = 52K92QH5M9;
 				ENABLE_PREVIEWS = YES;
@@ -324,7 +330,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.theminesec.tapauth.demo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -373,6 +379,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8413DA0C2D2EAD0000A71B89 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84A763D22D16004F0029EF63 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		8413DA0E2D2EAD0000A71B89 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84A763D22D16004F0029EF63 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
 		84A763D32D16004F0029EF63 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 84A763D22D16004F0029EF63 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

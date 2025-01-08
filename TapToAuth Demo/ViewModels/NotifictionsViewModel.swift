@@ -13,7 +13,7 @@ class NotificationsViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     @Published var selectedOrder: Order? = nil
     
-    func fetchOrders(for cardNo: String) {
+    func fetchOrders(for cardNo: String, completion: (() -> Void)? = nil) {
         isLoading = true
         errorMessage = nil
         
@@ -33,6 +33,7 @@ class NotificationsViewModel: ObservableObject {
                 case .failure(let error):
                     self?.errorMessage = error.localizedDescription
                 }
+                completion?()
             }
         }
     }
