@@ -12,6 +12,7 @@ struct NotificationsView: View {
     @StateObject private var viewModel = NotificationsViewModel()
     @State private var showTapCardView = false
     @State private var selectedAmount: String = ""
+    @EnvironmentObject var appState: AppState
     
     var body: some View {
         NavigationStack {
@@ -101,7 +102,17 @@ struct NotificationsView: View {
                     }
                 }
             }
+            .onAppear {
+                viewModel.fetchOrders(for: retrieveUser()?.cardNo ?? "")
+                if let pendingOrder = appState.pendingOrder {
+                    handlePendingOrder(pendingOrder)
+                }
+            }
         }
+    }
+    
+    private func handlePendingOrder(_ order: Order) {
+        selectedOrder = order
     }
     
     private func refreshNotifications() async {

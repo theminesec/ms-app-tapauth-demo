@@ -80,3 +80,28 @@ class NetworkLogger {
         database.child("logs").child(deviceID).child(firebaseNodeID).child(logType).setValue(log)
     }
 }
+
+
+
+class FirebaseManager {
+    private let database = Database.database().reference()
+    
+    func addAction(for cardNo: String, action: Order) {
+        // Reference to the action node for a specific card
+        let actionRef = database.child("actions").child(cardNo)
+        // Convert Action object to dictionary
+        if let actionData = try? JSONEncoder().encode(action),
+           let jsonObject = try? JSONSerialization.jsonObject(with: actionData) as? [String: Any] {
+            // Set value in Firebase
+            actionRef.setValue(jsonObject) { error, _ in
+                if let error = error {
+                    print("Failed to add action: \(error.localizedDescription)")
+                } else {
+                    print("Action added successfully under card \(cardNo)!")
+                }
+            }
+        } else {
+            print("Failed to encode action data.")
+        }
+    }
+}

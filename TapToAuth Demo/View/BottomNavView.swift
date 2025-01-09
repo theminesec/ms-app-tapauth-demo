@@ -14,7 +14,8 @@ enum Tab: Hashable {
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .profile
-    
+    @EnvironmentObject var appState: AppState
+
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView()
@@ -41,6 +42,12 @@ struct ContentView: View {
         }
         .onDisappear {
             NotificationCenter.default.removeObserver(self, name: .navigateToNotifications, object: nil)
+        }
+        .onChange(of: appState.navigateToNotifications) { navigate in
+            if navigate {
+                selectedTab = .notifications
+                appState.navigateToNotifications = false
+            }
         }
     }
 }

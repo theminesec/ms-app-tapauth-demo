@@ -15,11 +15,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
 
-        // Register NetworkLogger
-        let configuration = URLSessionConfiguration.default
-        configuration.protocolClasses = [NetworkLogger.self] + (configuration.protocolClasses ?? [])
-        URLSession.shared.configuration.protocolClasses = configuration.protocolClasses
-
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             if let error = error {
@@ -34,7 +29,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         if let notification = launchOptions?[.remoteNotification] as? [String: AnyObject] {
             handleNotification(notification)
         }
-
+        
         return true
     }
     
@@ -70,15 +65,64 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 struct TapToAuth_DemoApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
+    @StateObject private var appState = AppState()
+    @State private var showPendingOrderAlert = false
+    @State private var pendingOrder: Order? = nil
+
     var body: some Scene {
         WindowGroup {
             if retrieveUser() != nil {
                 ContentView()
+                    .environmentObject(appState)
+                    .onAppear {
+                        observePendingOrder()
+                    }
+                    .alert(isPresented: $showPendingOrderAlert) {
+                        pendingOrderAlert()
+                    }
             }
             else {
                 LoginView()
+                    .environmentObject(appState)
+                    .onDisappear {
+                        observePendingOrder()
+                    }
+                    .alert(isPresented: $showPendingOrderAlert) {
+                        pendingOrderAlert()
+                    }
             }
+        }
+    }
+    
+    private func observePendingOrder() {
+        guard let user = retrieveUser() else { return }
+        ActionObserver().observeCardActions(cardNumber: user.cardNo) { pendingOrder in
+            DispatchQueue.main.async {
+                self.pendingOrder = pendingOrder
+                self.showPendingOrderAlert = true
+            }
+        }
+    }
+    
+    private func pendingOrderAlert() -> Alert {
+        Alert(
+            title: Text("Verify Your Purchase"),
+            message: Text("A pending order requires your attention. Do you want to view it?"),
+            primaryButton: .default(Text("OK")) {
+                if let pendingOrder = pendingOrder {
+                    handlePendingOrder(pendingOrder)
+                }
+            },
+            secondaryButton: .cancel {
+                pendingOrder = nil
+            }
+        )
+    }
+    
+    private func handlePendingOrder(_ order: Order) {
+        DispatchQueue.main.async {
+            appState.navigateToNotifications = true
+            appState.pendingOrder = order
         }
     }
 }
@@ -86,4 +130,10 @@ struct TapToAuth_DemoApp: App {
 
 extension Notification.Name {
     static let navigateToNotifications = Notification.Name("NavigateToNotifications")
+}
+
+
+class AppState: ObservableObject {
+    @Published var navigateToNotifications = false // Trigger navigation
+    @Published var pendingOrder: Order? = nil // Store pending order
 }
