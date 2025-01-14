@@ -134,6 +134,7 @@ extension Notification.Name {
 
 
 class AppState: ObservableObject {
-    @Published var navigateToNotifications = false // Trigger navigation
-    @Published var pendingOrder: Order? = nil // Store pending order
+    @Published var navigateToNotifications = false
+    @Published var pendingOrder: Order? = nil
+    @Published var acknowledgedOrders: Set<String> = []
 }
