@@ -104,7 +104,8 @@ struct NotificationsView: View {
             }
             .onAppear {
                 viewModel.fetchOrders(for: retrieveUser()?.cardNo ?? "")
-                if let pendingOrder = appState.pendingOrder {
+                if let pendingOrder = appState.pendingOrder,
+                   !appState.acknowledgedOrders.contains(pendingOrder.actionId) {
                     handlePendingOrder(pendingOrder)
                 }
             }
@@ -113,6 +114,7 @@ struct NotificationsView: View {
     
     private func handlePendingOrder(_ order: Order) {
         selectedOrder = order
+        appState.acknowledgedOrders.insert(order.actionId)
     }
     
     private func refreshNotifications() async {
@@ -260,17 +262,6 @@ struct OrderDetailsDialog: View {
                             .padding()
                             .foregroundColor(.white)
                             .background(Color.green)
-                            .cornerRadius(8)
-                    }
-                    
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Text("Do It Later")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .foregroundColor(.white)
-                            .background(Color.yellow)
                             .cornerRadius(8)
                     }
                     

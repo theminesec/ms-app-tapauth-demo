@@ -13,7 +13,7 @@ class ActionObserver {
     func observeCardActions(cardNumber: String, onPendingAction: @escaping (Order) -> Void) {
         let cardRef = Database.database().reference().child("actions").child(cardNumber)
         
-        cardRef.observe(.value) { snapshot in            
+        cardRef.observe(.value) { snapshot in
             guard let orderData = snapshot.value as? [String: Any] else {
                 print("No data found for card: \(cardNumber)")
                 return
@@ -21,8 +21,9 @@ class ActionObserver {
             
             if let order = self.parseOrder(data: orderData) {
                 print("Parsed Order: \(order)")
-                    if order.status == .pending {
+                if order.status == .pending {
                     onPendingAction(order)
+                    self.updateOrderStatus(cardNumber: cardNumber, actionId: order.actionId, newStatus: "OPENED")
                 }
             } else {
                 print("Failed to parse Order from data: \(orderData)")
@@ -57,5 +58,16 @@ class ActionObserver {
             expired: expired,
             status: status
         )
+    }
+    
+    private func updateOrderStatus(cardNumber: String, actionId: String, newStatus: String) {
+        let actionRef = Database.database().reference().child("actions").child(cardNumber).child("status")
+        actionRef.setValue(newStatus) { error, _ in
+            if let error = error {
+                print("Failed to update order status for actionId \(actionId): \(error.localizedDescription)")
+            } else {
+                print("Order status updated to \(newStatus) for actionId \(actionId)")
+            }
+        }
     }
 }

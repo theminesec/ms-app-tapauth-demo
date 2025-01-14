@@ -19,6 +19,7 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             HomeView()
+                .environmentObject(appState)
                 .tabItem {
                     Image(systemName: "person.fill")
                     Text("Profile")
@@ -47,6 +48,7 @@ struct ContentView: View {
             if navigate {
                 selectedTab = .notifications
                 appState.navigateToNotifications = false
+                appState.pendingOrder = nil
             }
         }
     }

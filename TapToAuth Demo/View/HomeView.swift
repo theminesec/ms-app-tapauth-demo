@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct HomeView: View {
+    
+    @EnvironmentObject var appState: AppState
+
     private var user: User? {
         retrieveUser()
     }
@@ -77,7 +80,7 @@ struct HomeView: View {
     
     private func logout() {
         UserDefaults.standard.removeObject(forKey: Constants.UserDefaultsKeys.user)
-        UIApplication.shared.resetRootView(to: LoginView())
+        UIApplication.shared.resetRootView(to: LoginView().environmentObject(appState))
     }
     
     private func maskCardNumber(_ cardNumber: String?) -> String {

@@ -15,7 +15,9 @@ struct TapCardView: View {
     @State private var player: AVPlayer?
     @State private var countdown: Int = 10
     private let nfcReader = NFCMiFareUltralight()
-
+    
+    @State private var showAlert: Bool = false
+    
     var body: some View {
         if let order = viewModel.selectedOrder {
             ZStack {
@@ -32,9 +34,9 @@ struct TapCardView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
                     .padding(.top, 16)
-
+                    
                     Spacer()
-
+                    
                     // Video animation
                     VStack {
                         if let videoURL = Bundle.main.url(forResource: "anim_await_card_day", withExtension: "mp4") {
@@ -56,9 +58,9 @@ struct TapCardView: View {
                                 .foregroundColor(.red)
                         }
                     }
-
+                    
                     Spacer()
-
+                    
                     // Tap to Pay instructions
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Tap to Pay")
@@ -67,11 +69,11 @@ struct TapCardView: View {
                         Text("Tap and hold card to the back of device")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
-
+                        
                         Text("\(countdown)s")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.green)
-
+                        
                         // Payment Icons
                         HStack(spacing: 12) {
                             Image("visa")
@@ -84,10 +86,10 @@ struct TapCardView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
-
+                    
                     Spacer()
                 }
-
+                
                 VStack {
                     Spacer()
                     Button(action: {
@@ -102,9 +104,16 @@ struct TapCardView: View {
                 }
             }
             .background(Color.white.edgesIgnoringSafeArea(.all))
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text("Card Verification Failed!"),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
-
+    
     private func setupPlayerLooping() {
         guard let player = player else { return }
         NotificationCenter.default.addObserver(
@@ -116,19 +125,19 @@ struct TapCardView: View {
             player.play()
         }
     }
-
+    
     private func startCountdown() {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             if countdown > 0 {
                 countdown -= 1
             } else {
                 timer.invalidate()
-//                viewModel.updateOrderStatus(actionId: viewModel.selectedOrder, newStatus: <#T##ActionStatus#>)(to: .timeout)
+                //                viewModel.updateOrderStatus(actionId: viewModel.selectedOrder, newStatus: <#T##ActionStatus#>)(to: .timeout)
                 dismiss()
             }
         }
     }
-
+    
     private func startNFCSession() {
         nfcReader.onReadSuccess = { card in
             print("Card scanned successfully: \(card.cardNo)")
@@ -137,16 +146,17 @@ struct TapCardView: View {
                 case .success:
                     dismiss()
                 case .failure(let error):
+                    showAlert = true
                     print("Failed to update action: \(error.localizedDescription)")
                 }
             }
         }
-
+        
         nfcReader.onReadFailure = { error in
             print("NFC scan failed: \(error)")
             dismiss()
         }
-
+        
         nfcReader.startSession()
     }
 }
